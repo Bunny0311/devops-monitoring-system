@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: myapp-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: myapp.rules
+      rules:
+        - alert: MyAppReplicasUnavailable
+          expr: |
+            kube_deployment_spec_replicas{namespace="default", deployment="myapp"}
+            >
+            kube_deployment_status_replicas_available{namespace="default", deployment="myapp"}
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "MyApp has unavailable replicas"
+            description: "The myapp deployment has fewer available replicas than desired."
